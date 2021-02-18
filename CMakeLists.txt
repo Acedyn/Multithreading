@@ -20,7 +20,7 @@ add_subdirectory(source/01_threadManagement)
 add_subdirectory(source/02_shareData)
 
 # Include source/03-synchronizeOperationso
-# add_subdirectory(source/03-synchronizeOperations)
+add_subdirectory(source/03-synchronizeOperations)
 
 # Include source/04_memoryAndAtomicTypes
 # add_subdirectory(source/04_memoryAndAtomicTypes)
