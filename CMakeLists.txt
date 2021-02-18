@@ -17,7 +17,7 @@ project(MultiThreadingExercices
 add_subdirectory(source/01_threadManagement)
 
 # Include source/02_shareData
-# add_subdirectory(source/02_shareData)
+add_subdirectory(source/02_shareData)
 
 # Include source/03-synchronizeOperationso
 # add_subdirectory(source/03-synchronizeOperations)

@@ -7,12 +7,16 @@ float** MatrixProduct::singleThreadProduct(const float (&m1)[4][4], const float 
 {
     float** product = nullptr;
     product = new float*[4];
+    // Loop over all the row of the matrix
     for(int row = 0; row < 4; row++)
     {
+        // Create an new array for that row
         product[row] = new float[4];
 
+        // Loop over all the column of that row
         for(int column = 0; column < 4; column++)
         {
+            // Compute the value of that [row][column]
             float value = 0.0f;
             for(int i = 0; i < 4; i++)
             {
@@ -29,15 +33,22 @@ float** MatrixProduct::multiThreadProduct(const float (&m1)[4][4], const float (
 {
     float** product = nullptr;
     product = new float*[4];
+    // We create a array of threads
     std::thread threads[4];
+    // Loop over all the row of the matrix
     for(int row = 0; row < 4; row++)
     {
+        // We launch a thread for each row
+        // We capture everything by reference
         threads[row] = std::thread([&]()->void
         {       
+            // Create an new array for that row
             product[row] = new float[4];
 
+            // Loop over all the column of that row
             for(int column = 0; column < 4; column++)
             {
+                // Compute the value of that [row][column]
                 float value = 0.0f;
                 for(int i = 0; i < 4; i++)
                 {
@@ -48,6 +59,7 @@ float** MatrixProduct::multiThreadProduct(const float (&m1)[4][4], const float (
         });
     }
 
+    // We wail for all the threads to finish
     for(int threadId = 0; threadId < 4; threadId++)
     {
         threads[threadId].join();
@@ -62,6 +74,7 @@ void MatrixProduct::matrixProduct()
     float** singleThreadMatrix = singleThreadProduct(matrix1, matrix2);
     auto time2 = std::chrono::high_resolution_clock::now();
     
+    // Loop over all the elements of the matrix to print them
     std::cout << "Single threaded :\n";
     for(int row = 0; row < 4; row++)
     {
@@ -80,6 +93,7 @@ void MatrixProduct::matrixProduct()
     float** multiThreadMatrix = multiThreadProduct(matrix1, matrix2);
     time2 = std::chrono::high_resolution_clock::now();
     
+    // Loop over all the elements of the matrix to print them
     std::cout << "Multi threaded :\n";
     for(int row = 0; row < 4; row++)
     {
