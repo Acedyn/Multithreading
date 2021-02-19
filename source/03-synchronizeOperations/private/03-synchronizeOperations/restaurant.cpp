@@ -1,26 +1,70 @@
 #include <iostream>
-#include <thread>
+#include <string>
 #include <chrono>
 
 #include "03-synchronizeOperations/restaurant.h"
 
 ActorModel::Restaurant::Restaurant():
-    waiter(this),
-    isOpen(false) { }
+    isOpen(false),
+    waiter(this, &waiterCondition, &lockInputQuery) { }
+
+ActorModel::Restaurant::~Restaurant()
+{
+    // Stop the waiter thread
+    waiter.stopWorking();
+}
 
 void ActorModel::Restaurant::openRestaurant()
 {
-    std::thread{waiter};
+    // Start the waiter thread
+    waiter.startWorking();
 
+    // Open the restaurant
     isOpen = true;
 
+    // Until someone close the restaurant
     while(isOpen)
     {
-        char* _customerName;
-        std::cin.get(_customerName, 256);
+        // Lock the inputQuery mutex to make sure we ask questions one by one
+        lockInputQuery.lock();
+        // Welcome the user and ask for his name
+        std::cout 
+            << "Restaurant : Welcome to our restaurant !\n"
+            << "Restaurant : What is your name ?" << std::endl;
+        std::string _customerName;
+        std::getline(std::cin, _customerName);
+        std::cout << "Restaurant : Alright, someone will take care of you\n" << std::endl;
+        // Add the customer to the list of customers
+        addCustomer(_customerName.c_str());
+        // Add a job for the waiter
+        waiter.addJob();
+        // Notify the waiter that there new jobs to do
+        waiterCondition.notify_one();
+        // Unlock the inputQuery mutex
+        lockInputQuery.unlock();
 
-        pendingCustomers.emplace_back(Customer(_customerName));
-
-        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        // Wait a bit to prevent 100% cpu usage
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
+}
+
+void ActorModel::Restaurant::addCustomer(const char* _customerName)
+{
+    std::lock_guard<std::mutex> autoLock(lockState);
+    customers.emplace_back(Customer(_customerName));
+}
+
+ActorModel::Customer* ActorModel::Restaurant::getCommingCustomers()
+{
+    // Loop over all the customers and find one that is in comming state
+    for(Customer& _customer : customers)
+    {
+        if(_customer.getState() == ActorModel::Customer::STATE::COMMING)
+        {
+            return &_customer;
+        }
+    }
+
+    // If no matching customers has been found return null
+    return nullptr;
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <string>
 
 namespace ActorModel
 {
@@ -16,12 +17,16 @@ namespace ActorModel
         };
 
     public:
-        Meal(const char* _name, std::array<char*, 3> _ingredients);
+        Meal() { }
+        Meal(const std::string _name, std::array<std::string, 3> _ingredients);
+        Meal(const Meal& _other);
         ~Meal();
 
+        Meal& operator=(const Meal& _other);
+
     private:
-        const char* name;
-        std::array<char*, 3> ingredients;
+        std::string name;
+        std::array<std::string, 3> ingredients;
         char* result;
         STATE state;
     };
