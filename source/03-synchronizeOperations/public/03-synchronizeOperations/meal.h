@@ -23,6 +23,8 @@ namespace ActorModel
         ~Meal();
 
         Meal& operator=(const Meal& _other);
+        std::string getName() const { return name; }
+        std::array<std::string, 3> getIngredients() const { return ingredients; }
 
     private:
         std::string name;

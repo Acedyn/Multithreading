@@ -26,7 +26,7 @@ void ActorModel::Waiter::work()
         // Unlock manualy the mutex
         autoLock.unlock();
 
-        // If there is some customer that just came is
+        // If there is some customer that just came in
         Customer* _comingCustomer = restaurant->getCommingCustomers();
         if(_comingCustomer != nullptr)
         {
@@ -38,6 +38,7 @@ void ActorModel::Waiter::work()
 
 void ActorModel::Waiter::startWorking()
 {
+    if(isWorking) { return; }
     std::lock_guard<std::mutex> autoLock(lockState);
     isWorking = true;
     waiterThread = std::thread([&]()->void{ work(); });
@@ -45,6 +46,7 @@ void ActorModel::Waiter::startWorking()
 
 void ActorModel::Waiter::stopWorking()
 {
+    if(!isWorking) { return; }
     std::lock_guard<std::mutex> autoLock(lockState);
     isWorking = false;
     waiterThread.join();
@@ -88,5 +90,9 @@ void ActorModel::Waiter::takeOrder(Customer* _comingCustomer)
     
     // Set the orderedMeal to the customer data
     _comingCustomer->setOrderedMeal({ _mealName, _ingredients });
+    // Add a job for the cooker
+    restaurant->cooker.addJob();
+    // Notify the cooker that there is new job to do
+    restaurant->cookerCondition.notify_one();
     removeJob();
 }

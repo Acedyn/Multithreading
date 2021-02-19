@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <mutex>
 
 #include "meal.h"
@@ -18,7 +19,7 @@ namespace ActorModel
         };
 
     public:
-        Customer(const char* _name);
+        Customer(const std::string _name);
         Customer(const Customer& _other);
         ~Customer();
 
@@ -26,7 +27,7 @@ namespace ActorModel
         void setOrderedMeal(Meal _orderedMeal);
         Meal getOrderedMeal() const { return orderedMeal; }
 
-        const char* name;
+        const std::string name;
 
     private:
         Meal orderedMeal;

@@ -6,18 +6,23 @@
 
 ActorModel::Restaurant::Restaurant():
     isOpen(false),
-    waiter(this, &waiterCondition, &lockInputQuery) { }
+    waiter(this, &waiterCondition, &lockInputQuery),
+    cooker(this, &cookerCondition) { }
 
 ActorModel::Restaurant::~Restaurant()
 {
     // Stop the waiter thread
     waiter.stopWorking();
+    // Stop the cooker thread
+    cooker.stopWorking();
 }
 
 void ActorModel::Restaurant::openRestaurant()
 {
     // Start the waiter thread
     waiter.startWorking();
+    // Start the cooker thread
+    cooker.startWorking();
 
     // Open the restaurant
     isOpen = true;
@@ -35,7 +40,7 @@ void ActorModel::Restaurant::openRestaurant()
         std::getline(std::cin, _customerName);
         std::cout << "Restaurant : Alright, someone will take care of you\n" << std::endl;
         // Add the customer to the list of customers
-        addCustomer(_customerName.c_str());
+        addCustomer(_customerName);
         // Add a job for the waiter
         waiter.addJob();
         // Notify the waiter that there new jobs to do
@@ -48,7 +53,7 @@ void ActorModel::Restaurant::openRestaurant()
     }
 }
 
-void ActorModel::Restaurant::addCustomer(const char* _customerName)
+void ActorModel::Restaurant::addCustomer(std::string _customerName)
 {
     std::lock_guard<std::mutex> autoLock(lockState);
     customers.emplace_back(Customer(_customerName));
@@ -60,6 +65,21 @@ ActorModel::Customer* ActorModel::Restaurant::getCommingCustomers()
     for(Customer& _customer : customers)
     {
         if(_customer.getState() == ActorModel::Customer::STATE::COMMING)
+        {
+            return &_customer;
+        }
+    }
+
+    // If no matching customers has been found return null
+    return nullptr;
+}
+
+ActorModel::Customer* ActorModel::Restaurant::getWaitingCustomers()
+{
+    // Loop over all the customers and find one that is in waiting state
+    for(Customer& _customer : customers)
+    {
+        if(_customer.getState() == ActorModel::Customer::STATE::WAITING)
         {
             return &_customer;
         }

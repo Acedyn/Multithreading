@@ -1,6 +1,6 @@
 #include "03-synchronizeOperations/customer.h"
 
-ActorModel::Customer::Customer(const char* _name) :
+ActorModel::Customer::Customer(const std::string _name) :
     name(_name),
     orderedMeal(Meal()),
     state(STATE::COMMING) { }
